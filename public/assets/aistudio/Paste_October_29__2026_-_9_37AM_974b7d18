@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام أرشفة الاضابير الإلكترونية - مديرية زراعة بابل</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Arabic Font - Cairo -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        iraqNavy: '#0F2C59',
+                        iraqGold: '#C5A880',
+                        iraqDarkGold: '#A38153',
+                        iraqBg: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #F1F5F9;
+        }
+        .gold-border {
+            border-color: #C5A880;
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0F2C59;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e3a8a;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800">
+
+    <!-- Header Section / الترويسة الرسمية -->
+    <header class="bg-iraqNavy text-white shadow-lg border-b-4 border-iraqGold">
+        <div class="container mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <!-- Emblem & Titles -->
+            <div class="flex items-center gap-4 text-center md:text-right">
+                <div class="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center p-2 border border-iraqGold/40">
+                    <i class="fa-solid me-0 fa-landmark text-3xl text-iraqGold"></i>
+                </div>
+                <div>
+                    <h2 class="text-xs text-iraqGold font-semibold tracking-wider">جمهورية العراق - ديوان محافظة بابل</h2>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-wide text-white">مديرية زراعة بابل</h1>
+                    <p class="text-xs text-slate-300">نظام أرشفة وإدارة اضابير الموظفين الإلكتروني</p>
+                </div>
+            </div>
+
+            <!-- User Header Controls (Shown when logged in) -->
+            <div id="userInfoHeader" class="hidden flex items-center gap-4 bg-white/10 px-4 py-2 rounded-lg border border-white/10">
+                <div class="text-left md:text-right">
+                    <p class="text-xs text-slate-300">مرحباً بك،</p>
+                    <p id="currentUserName" class="text-sm font-bold text-iraqGold">المسؤول</p>
+                </div>
+                <button onclick="logout()" class="bg-red-600/80 hover:bg-red-700 text-white p-2 rounded-md transition duration-200 text-xs flex items-center gap-1" title="تسجيل الخروج">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span>خروج</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="container mx-auto px-4 py-8 flex-grow">
+
+        <!-- 1. LOGIN SECTION / واجهة تسجيل الدخول -->
+        <section id="loginSection" class="max-w-md mx-auto my-12 bg-white rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="bg-iraqNavy text-white p-6 text-center relative border-b-2 border-iraqGold">
+                <i class="fa-solid fa-folder-closed text-5xl text-iraqGold mb-3"></i>
+                <h3 class="text-xl font-bold">تسجيل الدخول للنظام</h3>
+                <p class="text-xs text-slate-300 mt-1">الرجاء إدخال بيانات الدخول المعتمدة</p>
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)" class="p-6 space-y-5">
+                <div id="loginError" class="hidden p-3 bg-red-100 border-r-4 border-red-500 text-red-700 text-xs rounded">
+                    اسم المستخدم أو كلمة المرور غير صحيحة!
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">اسم المستخدم</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                            <i class="fa-solid fa-user"></i>
+                        </span>
+                        <input type="text" id="username" required value="admin" class="w-full pr-10 pl-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-iraqNavy focus:outline-none" placeholder="اسم المستخدم">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-2">كلمة المرور</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-slate-400">
+                            <i class="fa-solid fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" required value="123456" class="w-full pr-10 pl-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-2 focus:ring-iraqNavy focus:outline-none" placeholder="كلمة المرور">
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-2 rounded text-xs text-slate-500 text-center border border-slate-200">
+                    <p>بيانات تجريبية: المستخدم <b>admin</b> | كلمة السر <b>123456</b></p>
+                </div>
+
+                <button type="submit" class="w-full bg-iraqNavy hover:bg-slate-800 text-white font-bold py-2.5 rounded-lg transition duration-200 shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>دخول للنظام</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- 2. DASHBOARD / واجهة إدارة الموظفين -->
+        <section id="dashboardSection" class="hidden space-y-6">
+            <!-- Action Bar & Stats -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                <div>
+                    <h3 class="text-lg font-bold text-iraqNavy">سجل الموظفين والاضابير</h3>
+                    <p class="text-xs text-slate-500">إدارة وتنظيم اضابير موظفي مديرية زراعة بابل</p>
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <!-- Search Input -->
+                    <div class="relative flex-grow sm:flex-grow-0 sm:w-64">
+                        <input type="text" id="searchInput" oninput="filterEmployees()" placeholder="بحث باسم الموظف..." class="w-full pr-8 pl-3 py-1.5 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-iraqNavy">
+                        <span class="absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-400 text-xs">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                    </div>
+
+                    <!-- Add Employee Button -->
+                    <button onclick="openModal('addEmployeeModal')" class="bg-iraqNavy hover:bg-slate-800 text-white font-semibold text-xs px-4 py-2 rounded-lg transition shadow flex items-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>إضافة موظف جديد</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Employee Table -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-iraqNavy text-xs font-bold border-b border-slate-200">
+                                <th class="p-3">#</th>
+                                <th class="p-3">اسم الموظف</th>
+                                <th class="p-3">العنوان الوظيفي</th>
+                                <th class="p-3">القسم / الشعبة</th>
+                                <th class="p-3">عدد الاضابير</th>
+                                <th class="p-3 text-center">الإجراءات والخيارات</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employeeTableBody" class="text-xs divide-y divide-slate-100">
+                            <!-- Dynamic Content Inserted Here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div id="emptyTableMessage" class="hidden p-8 text-center text-slate-400">
+                    <i class="fa-solid fa-folder-open text-4xl mb-2"></i>
+                    <p>لا يوجد موظفون مضافون حالياً</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. PROFILE VIEW / صفحة البروفايل الشخصي للموظف -->
+        <section id="profileSection" class="hidden space-y-6">
+            <!-- Top Controls -->
+            <div class="flex items-center justify-between">
+                <button onclick="showDashboard()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs px-3 py-2 rounded-lg transition flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    <span>العودة للقائمة الرئيسية</span>
+                </button>
+                <span class="text-xs text-slate-400">رقم الموظف التعريفي: <span id="profileEmpId" class="font-bold text-slate-600">--</span></span>
+            </div>
+
+            <!-- Employee Info Header Card -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border-r-4 border-iraqNavy border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-iraqNavy text-iraqGold rounded-full flex items-center justify-center font-bold text-2xl shadow">
+                        <i class="fa-solid fa-id-badge"></i>
+                    </div>
+                    <div>
+                        <h2 id="profileName" class="text-xl font-bold text-slate-800">اسم الموظف</h2>
+                        <div class="flex flex-wrap gap-4 text-xs text-slate-500 mt-1">
+                            <span><i class="fa-solid fa-briefcase text-iraqGold me-1"></i> <span id="profileTitle">العنوان الوظيفي</span></span>
+                            <span><i class="fa-solid fa-building text-iraqGold me-1"></i> <span id="profileDept">القسم / الشعبة</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="openUploadModalForCurrent()" class="bg-iraqNavy hover:bg-slate-800 text-white text-xs px-4 py-2 rounded-lg transition flex items-center gap-2 shadow">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                    <span>إضافة اضبارة جديدة (PDF)</span>
+                </button>
+            </div>
+
+            <!-- Main Layout: Left Files List / Right PDF Viewer -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- PDF List Side (4 Cols) -->
+                <div class="lg:col-span-4 bg-white rounded-xl shadow-sm border border-slate-200 p-4 space-y-4">
+                    <h3 class="font-bold text-xs text-iraqNavy border-b pb-2 flex justify-between items-center">
+                        <span><i class="fa-solid fa-files me-1"></i> قائمة اضابير الموظف</span>
+                        <span id="docCountBadge" class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full text-[10px]">0</span>
+                    </h3>
+
+                    <div id="pdfFileList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                        <!-- Dynamic PDF Items -->
+                    </div>
+                </div>
+
+                <!-- PDF Viewer Side (8 Cols) -->
+                <div class="lg:col-span-8 bg-white rounded-xl shadow-sm border border-slate-200 p-4 min-h-[550px] flex flex-col">
+                    <div class="flex justify-between items-center border-b pb-2 mb-3">
+                        <h3 id="currentViewingTitle" class="font-bold text-xs text-iraqNavy truncate">
+                            <i class="fa-solid fa-eye me-1"></i> استعراض الملف
+                        </h3>
+                        <div id="viewerActions" class="hidden gap-2">
+                            <a id="downloadPdfBtn" download="اضبارة.pdf" href="#" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs px-2 py-1 rounded transition flex items-center gap-1">
+                                <i class="fa-solid fa-download"></i> تحميل
+                            </a>
+                        </div>
+                    </div>
+
+                    <div id="pdfViewerContainer" class="flex-grow bg-slate-100 rounded-lg flex items-center justify-center border border-dashed border-slate-300 relative overflow-hidden">
+                        <p class="text-xs text-slate-400 text-center px-4">
+                            <i class="fa-regular fa-file-pdf text-4xl block mb-2 text-slate-300"></i>
+                            اختر اضبارة من القائمة لعرضها هنا
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-iraqNavy text-slate-300 text-xs py-4 border-t-2 border-iraqGold mt-auto">
+        <div class="container mx-auto px-4 text-center space-y-1">
+            <p>جميع الحقوق محفوظة &copy; 2026 - مديرية زراعة بابل</p>
+            <p class="text-[10px] text-slate-400">نظام الأرشفة الإلكترونية لأضابير الموظفين - ديوان محافظة بابل</p>
+        </div>
+    </footer>
+
+    <!-- MODAL: Add New Employee -->
+    <div id="addEmployeeModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div class="bg-iraqNavy text-white p-4 flex justify-between items-center border-b-2 border-iraqGold">
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-user-plus text-iraqGold me-2"></i>إضافة موظف جديد</h3>
+                <button onclick="closeModal('addEmployeeModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleAddEmployee(event)" class="p-4 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">الاسم الكامل للموظف *</label>
+                    <input type="text" id="newEmpName" required class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-iraqNavy focus:outline-none" placeholder="أدخل اسم الموظف">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">العنوان الوظيفي *</label>
+                    <input type="text" id="newEmpTitle" required class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-iraqNavy focus:outline-none" placeholder="مثال: رئيس مهندسين زراعيين / رئيس كتاب">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">القسم / الشعبة *</label>
+                    <input type="text" id="newEmpDept" required class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-iraqNavy focus:outline-none" placeholder="مثال: شعبة الثروة الحيوانية / قسم الأراضي">
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t">
+                    <button type="button" onclick="closeModal('addEmployeeModal')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded">إلغاء</button>
+                    <button type="submit" class="px-4 py-1.5 bg-iraqNavy hover:bg-slate-800 text-white text-xs rounded font-bold">حفظ الموظف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: Upload PDF Document -->
+    <div id="uploadPdfModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full overflow-hidden border border-slate-200">
+            <div class="bg-iraqNavy text-white p-4 flex justify-between items-center border-b-2 border-iraqGold">
+                <h3 class="font-bold text-sm"><i class="fa-solid fa-file-circle-plus text-iraqGold me-2"></i>رفع اضبارة جديدة (PDF)</h3>
+                <button onclick="closeModal('uploadPdfModal')" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleUploadPdf(event)" class="p-4 space-y-4">
+                <input type="hidden" id="uploadEmpId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">اسم/عنوان الاضبارة أو المستند *</label>
+                    <input type="text" id="pdfTitle" required class="w-full px-3 py-1.5 text-xs border border-slate-300 rounded focus:ring-1 focus:ring-iraqNavy focus:outline-none" placeholder="مثال: الاضبارة الشخصية / الأمر الوزاري / الترفيعات">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">اختر ملف PDF *</label>
+                    <input type="file" id="pdfFileInput" accept="application/pdf" required class="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-iraqNavy file:text-white hover:file:bg-slate-800">
+                    <p class="text-[10px] text-slate-400 mt-1">يجب أن يكون الملف بصيغة PDF فقط (الحجم الأقصى الموصى به للعرض المحلي: 5MB).</p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t">
+                    <button type="button" onclick="closeModal('uploadPdfModal')" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs rounded">إلغاء</button>
+                    <button type="submit" class="px-4 py-1.5 bg-iraqNavy hover:bg-slate-800 text-white text-xs rounded font-bold">رفع وتخزين الملف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // IndexedDB Storage Initialization (Replaces LocalStorage to support large PDF files)
+        const DB_NAME = 'BabilAgriDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'employees';
+        let db = null;
+
+        let employees = [];
+        let activeEmployeeId = null;
+
+        // Initialize IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (event) => {
+                    console.error("IndexedDB error:", event.target.error);
+                    reject(event.target.error);
+                };
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    loadData().then(resolve);
+                };
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                    }
+                };
+            });
+        }
+
+        // Load all employee data from IndexedDB
+        function loadData() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.getAll();
+
+                request.onsuccess = () => {
+                    employees = request.result || [];
+                    if (employees.length === 0) {
+                        // Default Sample Data
+                        employees = [
+                            {
+                                id: 101,
+                                name: "أحمد علي حسين",
+                                title: "رئيس مهندسين زراعيين",
+                                dept: "قسم وقاية المزروعات",
+                                docs: []
+                            },
+                            {
+                                id: 102,
+                                name: "زينب كمال عبد الحسين",
+                                title: "ملاحظ فني",
+                                dept: "شعبة الأراضي والتأجير",
+                                docs: []
+                            }
+                        ];
+                        saveAllData().then(resolve);
+                    } else {
+                        resolve();
+                    }
+                };
+                request.onerror = (e) => reject(e);
+            });
+        }
+
+        // Save entire employees list
+        function saveAllData() {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.clear();
+                employees.forEach(emp => store.put(emp));
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = (e) => reject(e);
+            });
+        }
+
+        // Save a single employee
+        function saveEmployee(emp) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.put(emp);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = (e) => reject(e);
+            });
+        }
+
+        // Delete an employee
+        function deleteEmployeeFromDB(empId) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.delete(empId);
+                transaction.oncomplete = () => resolve();
+                transaction.onerror = (e) => reject(e);
+            });
+        }
+
+        // Initialize Database on Page Load
+        window.addEventListener('DOMContentLoaded', () => {
+            initDB().then(() => {
+                renderEmployeeTable();
+            }).catch(err => {
+                console.error("Failed to initialize database:", err);
+            });
+        });
+
+        // AUTHENTICATION
+        function handleLogin(e) {
+            e.preventDefault();
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            if (user === 'admin' && pass === '123456') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('userInfoHeader').classList.remove('hidden');
+                document.getElementById('userInfoHeader').classList.add('flex');
+                showDashboard();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            document.getElementById('userInfoHeader').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('loginSection').classList.remove('hidden');
+        }
+
+        // NAVIGATION
+        function showDashboard() {
+            document.getElementById('profileSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            renderEmployeeTable();
+        }
+
+        function showProfile(empId) {
+            activeEmployeeId = empId;
+            const emp = employees.find(e => e.id === empId);
+            if (!emp) return;
+
+            document.getElementById('profileEmpId').innerText = emp.id;
+            document.getElementById('profileName').innerText = emp.name;
+            document.getElementById('profileTitle').innerText = emp.title;
+            document.getElementById('profileDept').innerText = emp.dept;
+
+            document.getElementById('dashboardSection').classList.add('hidden');
+            document.getElementById('profileSection').classList.remove('hidden');
+
+            renderPdfList();
+            
+            // Reset Viewer
+            const container = document.getElementById('pdfViewerContainer');
+            container.innerHTML = `
+                <p class="text-xs text-slate-400 text-center px-4">
+                    <i class="fa-regular fa-file-pdf text-4xl block mb-2 text-slate-300"></i>
+                    اختر اضبارة من القائمة لعرضها هنا
+                </p>`;
+            document.getElementById('viewerActions').classList.add('hidden');
+            document.getElementById('currentViewingTitle').innerHTML = `<i class="fa-solid fa-eye me-1"></i> استعراض الملف`;
+        }
+
+        // EMPLOYEE MANAGEMENT
+        function renderEmployeeTable() {
+            const tbody = document.getElementById('employeeTableBody');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const filtered = employees.filter(e => e.name.toLowerCase().includes(searchVal));
+
+            if (filtered.length === 0) {
+                document.getElementById('emptyTableMessage').classList.remove('hidden');
+            } else {
+                document.getElementById('emptyTableMessage').classList.add('hidden');
+            }
+
+            filtered.forEach((emp, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 border-b border-slate-100 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-500">${index + 1}</td>
+                    <td class="p-3">
+                        <button onclick="showProfile(${emp.id})" class="font-bold text-iraqNavy hover:text-iraqDarkGold hover:underline text-right">
+                            ${emp.name}
+                        </button>
+                    </td>
+                    <td class="p-3 text-slate-600">${emp.title}</td>
+                    <td class="p-3 text-slate-600">${emp.dept}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 text-[11px] font-semibold rounded-full ${emp.docs.length > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-500'}">
+                            ${emp.docs.length} اضبارة
+                        </span>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="showProfile(${emp.id})" class="bg-iraqNavy/10 hover:bg-iraqNavy hover:text-white text-iraqNavy px-2.5 py-1 rounded text-xs transition flex items-center gap-1" title="عرض اضبارة الموظف">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <span>عرض الاضبارة</span>
+                            </button>
+                            <button onclick="openUploadModalForEmp(${emp.id})" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded text-xs transition flex items-center gap-1" title="إضافة ملف بي دي اف">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>إضافة اضبارة</span>
+                            </button>
+                            <button onclick="deleteEmployee(${emp.id})" class="bg-red-50 hover:bg-red-100 text-red-600 p-1.5 rounded transition" title="حذف الموظف">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterEmployees() {
+            renderEmployeeTable();
+        }
+
+        async function handleAddEmployee(e) {
+            e.preventDefault();
+            const name = document.getElementById('newEmpName').value;
+            const title = document.getElementById('newEmpTitle').value;
+            const dept = document.getElementById('newEmpDept').value;
+
+            const newEmp = {
+                id: Date.now(),
+                name: name,
+                title: title,
+                dept: dept,
+                docs: []
+            };
+
+            employees.push(newEmp);
+            await saveEmployee(newEmp);
+            
+            closeModal('addEmployeeModal');
+            document.getElementById('newEmpName').value = '';
+            document.getElementById('newEmpTitle').value = '';
+            document.getElementById('newEmpDept').value = '';
+            renderEmployeeTable();
+        }
+
+        async function deleteEmployee(empId) {
+            if (confirm("هل أنت تأكد من حذف الموظف وكافة اضابيره؟")) {
+                employees = employees.filter(e => e.id !== empId);
+                await deleteEmployeeFromDB(empId);
+                renderEmployeeTable();
+            }
+        }
+
+        // PDF FILE MANAGEMENT
+        function openUploadModalForEmp(empId) {
+            document.getElementById('uploadEmpId').value = empId;
+            openModal('uploadPdfModal');
+        }
+
+        function openUploadModalForCurrent() {
+            if (activeEmployeeId) {
+                openUploadModalForEmp(activeEmployeeId);
+            }
+        }
+
+        function handleUploadPdf(e) {
+            e.preventDefault();
+            const empId = parseInt(document.getElementById('uploadEmpId').value);
+            const docTitle = document.getElementById('pdfTitle').value;
+            const fileInput = document.getElementById('pdfFileInput');
+            const file = fileInput.files[0];
+
+            if (!file || file.type !== 'application/pdf') {
+                alert('الرجاء اختيار ملف بصيغة PDF فقط.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = async function (event) {
+                const base64PDF = event.target.result;
+
+                const emp = employees.find(e => e.id === empId);
+                if (emp) {
+                    emp.docs.push({
+                        docId: Date.now(),
+                        title: docTitle,
+                        uploadDate: new Date().toLocaleDateString('ar-IQ'),
+                        data: base64PDF
+                    });
+
+                    try {
+                        await saveEmployee(emp);
+                        closeModal('uploadPdfModal');
+                        document.getElementById('pdfTitle').value = '';
+                        fileInput.value = '';
+
+                        // Refresh Views
+                        if (activeEmployeeId === empId) {
+                            renderPdfList();
+                        }
+                        renderEmployeeTable();
+                    } catch (error) {
+                        alert("حدث خطأ أثناء حفظ الملف: " + error.message);
+                    }
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function renderPdfList() {
+            const emp = employees.find(e => e.id === activeEmployeeId);
+            const listContainer = document.getElementById('pdfFileList');
+            const badge = document.getElementById('docCountBadge');
+            
+            if (!emp) return;
+
+            badge.innerText = emp.docs.length;
+            listContainer.innerHTML = '';
+
+            if (emp.docs.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">لا توجد ملفات اضبارة مرفوعة لهذا الموظف</p>`;
+                return;
+            }
+
+            emp.docs.forEach((doc) => {
+                const item = document.createElement('div');
+                item.className = "p-2.5 rounded-lg border border-slate-200 hover:border-iraqNavy/40 bg-slate-50 hover:bg-white transition flex items-center justify-between gap-2 group cursor-pointer";
+                item.onclick = () => viewPdf(doc.docId);
+
+                item.innerHTML = `
+                    <div class="flex items-center gap-2 truncate">
+                        <i class="fa-solid fa-file-pdf text-red-600 text-base"></i>
+                        <div class="truncate">
+                            <p class="font-bold text-slate-700 text-xs truncate">${doc.title}</p>
+                            <p class="text-[10px] text-slate-400">${doc.uploadDate}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button onclick="event.stopPropagation(); deletePdf(${doc.docId})" class="text-slate-400 hover:text-red-600 p-1 rounded transition" title="حذف الملف">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        }
+
+        function viewPdf(docId) {
+            const emp = employees.find(e => e.id === activeEmployeeId);
+            if (!emp) return;
+
+            const doc = emp.docs.find(d => d.docId === docId);
+            if (!doc) return;
+
+            const container = document.getElementById('pdfViewerContainer');
+            container.innerHTML = `<iframe src="${doc.data}" class="w-full h-full min-h-[500px] rounded-lg border-0"></iframe>`;
+
+            document.getElementById('currentViewingTitle').innerHTML = `<i class="fa-solid fa-file-pdf text-red-600 me-1"></i> استعراض: ${doc.title}`;
+            
+            const downloadBtn = document.getElementById('downloadPdfBtn');
+            downloadBtn.href = doc.data;
+            downloadBtn.download = `${doc.title}.pdf`;
+            document.getElementById('viewerActions').classList.remove('hidden');
+        }
+
+        async function deletePdf(docId) {
+            if (confirm("هل أنت تأكد من حذف ملف هذه الاضبارة؟")) {
+                const emp = employees.find(e => e.id === activeEmployeeId);
+                if (emp) {
+                    emp.docs = emp.docs.filter(d => d.docId !== docId);
+                    await saveEmployee(emp);
+                    renderPdfList();
+                    renderEmployeeTable();
+
+                    // Clear Viewer
+                    const container = document.getElementById('pdfViewerContainer');
+                    container.innerHTML = `
+                        <p class="text-xs text-slate-400 text-center px-4">
+                            <i class="fa-regular fa-file-pdf text-4xl block mb-2 text-slate-300"></i>
+                            تم حذف الملف. اختر اضبارة أخرى للعرض
+                        </p>`;
+                    document.getElementById('viewerActions').classList.add('hidden');
+                }
+            }
+        }
+
+        // MODAL HELPERS
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "name": "نظام أرشفة الاضابير الإلكترونية - مديرية زراعة بابل",
+  "description": "نظام الأرشفة الإلكترونية وإدارة اضابير وسجلات موظفي مديرية زراعة بابل - ديوان محافظة بابل - جمهورية العراق",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
